@@ -85,6 +85,11 @@ npm start                   # serves the app and the API on $PORT
 > not found. `--include=dev` installs them for the build; nothing extra is
 > served at runtime.
 
+On a hosting platform, `npm run render-build` does all three steps in one
+command — it is exactly `npm ci --include=dev && npm run build && npm run
+migrate`, kept as a script so a deploy form only needs one line. Migrations
+do not require `JWT_SECRET`; only the API itself does.
+
 Required environment:
 
 | Variable | Notes |

@@ -17,6 +17,13 @@ import { dashboardRouter } from './routes/dashboard.js';
 import * as enums from './lib/enums.js';
 
 export function createApp() {
+  // Asserted here rather than at config load, so database-only tasks such as
+  // migrations can run without it. Without a signing key every session would
+  // be forgeable, so the API refuses to start.
+  if (!config.jwtSecret) {
+    throw new Error('Missing required environment variable: JWT_SECRET');
+  }
+
   const app = express();
 
   app.set('trust proxy', 1);

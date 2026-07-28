@@ -14,11 +14,15 @@ function required(name, fallback) {
 
 const nodeEnv = process.env.NODE_ENV ?? 'development';
 
-// A weak signing key in production would make every session forgeable, so
-// the fallback only applies outside production.
+// A weak signing key in production would make every session forgeable, so the
+// fallback only applies outside production. Left null rather than thrown on
+// here: migrations and other database tasks import this module and have no
+// use for a signing key, so requiring it at import would make `npm run
+// migrate` fail for a reason that has nothing to do with migrating. The API
+// asserts it in createApp(), which is the thing that actually signs tokens.
 const jwtSecret =
   nodeEnv === 'production'
-    ? required('JWT_SECRET')
+    ? process.env.JWT_SECRET || null
     : process.env.JWT_SECRET ?? 'dev-only-insecure-secret';
 
 export const config = {
