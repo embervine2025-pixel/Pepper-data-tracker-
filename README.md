@@ -74,9 +74,16 @@ so there is no API URL to configure and no CORS to get wrong.
 ```bash
 npm ci --include=dev        # see the note below -- plain `npm ci` is not enough
 npm run build               # emits web/dist
-npm run migrate             # apply the schema to the production database
-npm start                   # serves the app and the API on $PORT
+npm start                   # migrates, then serves the app and API on $PORT
 ```
+
+**Migrations run at startup, not during the build.** A hosting platform's
+build phase typically cannot reach the database's private network, so a build
+that migrates fails for reasons unrelated to your code. `npm start` applies
+anything pending before it listens, holding a PostgreSQL advisory lock so
+concurrent instances on a rolling deploy cannot race. Set
+`MIGRATE_ON_START=false` if you'd rather run `npm run migrate` as a separate
+deploy step.
 
 > **`--include=dev` is required.** Vite and Tailwind are devDependencies —
 > correct, since they are build tools that do not ship in the bundle. But
@@ -85,10 +92,10 @@ npm start                   # serves the app and the API on $PORT
 > not found. `--include=dev` installs them for the build; nothing extra is
 > served at runtime.
 
-On a hosting platform, `npm run render-build` does all three steps in one
-command — it is exactly `npm ci --include=dev && npm run build && npm run
-migrate`, kept as a script so a deploy form only needs one line. Migrations
-do not require `JWT_SECRET`; only the API itself does.
+On a hosting platform, `npm run render-build` is both build steps in one
+command — exactly `npm ci --include=dev && npm run build` — kept as a script
+so a deploy form's build field only needs one line. Migrations are not part
+of it; they happen at startup, where the database is actually reachable.
 
 Required environment:
 
@@ -118,9 +125,9 @@ reason not to.
 
 Two things to get right whatever you choose:
 
-- **Run migrations as part of deploying**, before the new process takes
-  traffic. `npm run migrate` is safe to re-run; it applies only what is
-  pending.
+- **Migrations are automatic on start**, so there is nothing to remember. If
+  you disable that, run `npm run migrate` before the new process takes
+  traffic; it is safe to re-run and applies only what is pending.
 - **Do not run `npm run seed` against production.** It creates example
   accounts with a published password. It refuses to run when `NODE_ENV` is
   `production`, but keep it out of your deploy scripts regardless.

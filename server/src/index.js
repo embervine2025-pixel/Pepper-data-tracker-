@@ -16,6 +16,15 @@ async function start() {
   // Fail loudly at boot rather than on the first request.
   await pool.query('SELECT 1');
 
+  // Migrations run here, not in the build step. A hosting platform's build
+  // phase generally cannot reach the database's private network, so a build
+  // that migrates fails for reasons unrelated to the code. Startup always
+  // can, and an advisory lock keeps concurrent instances from racing.
+  if (config.migrateOnStart) {
+    const { runMigrations } = await import('./db/migrate.js');
+    await runMigrations({ silent: true });
+  }
+
   const server = app.listen(config.port, () => {
     console.log(`[api] listening on http://localhost:${config.port} (${config.nodeEnv})`);
     if (config.serveWeb) console.log(`[api] serving the web build from ${config.webDistPath}`);

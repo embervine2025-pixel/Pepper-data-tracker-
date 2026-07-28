@@ -48,6 +48,14 @@ export const config = {
    *
    * Set SERVE_WEB=false to run the API alone behind a separate static host.
    */
+  /**
+   * Apply pending migrations when the server starts. On by default: a hosting
+   * platform's build step usually cannot reach the database, so the build is
+   * the wrong place to migrate. Set MIGRATE_ON_START=false if you run
+   * migrations as a separate deploy step instead.
+   */
+  migrateOnStart: (process.env.MIGRATE_ON_START ?? 'true') === 'true',
+
   serveWeb: (process.env.SERVE_WEB ?? String(nodeEnv === 'production')) === 'true',
   webDistPath: resolve(process.env.WEB_DIST_PATH ?? join(here, '..', '..', 'web', 'dist')),
 };
