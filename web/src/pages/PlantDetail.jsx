@@ -7,6 +7,7 @@ import {
   PageHeader,
   Spinner,
   ErrorBanner,
+  EmptyState,
   DetailRow,
   VisibilityBadge,
   SpeciesChip,
@@ -49,6 +50,28 @@ export default function PlantDetail() {
   const remove = useMutation(() => api.delete(`/plants/${id}`));
 
   if (loading) return <Spinner label="Loading plant" />;
+
+  // A plant that is private to someone else is indistinguishable from one
+  // that never existed -- that is deliberate. But "Try again" is useless
+  // advice for either, and this is the screen you land on when following a
+  // link to a plant that was not shared with you.
+  if (error?.status === 404) {
+    return (
+      <>
+        <PageHeader title="Plant not found" />
+        <EmptyState
+          title="This plant isn’t available to you"
+          description="Either it doesn’t exist, or the breeder who owns it hasn’t shared it. If a colleague sent you this link, ask them to share the plant with your handle."
+          action={
+            <Link to="/plants" className="btn-primary">
+              Back to plants
+            </Link>
+          }
+        />
+      </>
+    );
+  }
+
   if (error) return <ErrorBanner error={error} onRetry={reload} />;
 
   const { plant, parents, children } = data;
