@@ -24,8 +24,16 @@ npm run migrate             # applies the schema
 npm run seed                # optional: a worked example pedigree
 
 npm run dev:api             # http://localhost:4000
-npm run dev:web             # http://localhost:5173
+npm run dev:web             # http://localhost:5173  <- open this one
 ```
+
+Run the two dev servers in separate terminals; both keep running. Then open
+**http://localhost:5173** and sign in with the seeded account below.
+
+Re-running `npm run seed` on a database that already has data is a no-op — it
+tells you so rather than failing on a duplicate accession code. To rebuild the
+example from scratch, `npm run seed -- --fresh`. The same `--` applies to
+`npm run migrate -- --reset`, which drops the schema and reapplies it.
 
 The Vite dev server proxies `/api` to port 4000, so the browser stays on one
 origin. Point it elsewhere with `VITE_API_TARGET`.

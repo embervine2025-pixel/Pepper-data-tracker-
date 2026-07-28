@@ -21,6 +21,19 @@ async function seed({ fresh = false } = {}) {
     // users cascades to plants -> pollinations/pods/shares.
     await pool.query('TRUNCATE users CASCADE');
     console.log('[seed] cleared existing data');
+  } else {
+    // Seeding twice would trip the per-owner accession uniqueness with a
+    // constraint error that says nothing useful. Stop with instructions
+    // instead -- re-running the documented command is the obvious thing to
+    // try when you are not sure the first one worked.
+    const { rows } = await pool.query(
+      "SELECT 1 FROM users WHERE email = 'ava@embervine.test' LIMIT 1",
+    );
+    if (rows.length > 0) {
+      console.log('[seed] this database is already seeded — nothing to do.');
+      console.log('[seed] to rebuild it from scratch: npm run seed -- --fresh');
+      return;
+    }
   }
 
   const passwordHash = await bcrypt.hash(PASSWORD, config.bcryptRounds);
