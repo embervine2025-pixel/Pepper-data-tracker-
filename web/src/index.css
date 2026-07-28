@@ -95,6 +95,42 @@
   }
 }
 
+/* Touch devices. Keyed on the pointer type rather than a width breakpoint, so
+   a laptop kept narrow does not get phone-sized controls. */
+@media (pointer: coarse) {
+  /* Each variant has to be named: `.btn-primary` composes btn's declarations
+     with @apply, so the element never carries a literal `btn` class for a
+     `.btn` selector to match. */
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-danger,
+  .input {
+    min-height: 2.75rem; /* 44px — the smallest reliably tappable target */
+  }
+
+  /* The default range thumb is around 16px tall; too small to grab reliably. */
+  input[type='range'] {
+    height: 2.75rem;
+  }
+
+  /* A 16px checkbox is a poor target even with its label clickable. */
+  input[type='checkbox'] {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  /* iOS Safari zooms the page whenever a focused field is under 16px, which
+     on these forms meant a zoom-and-scroll fight on every input. */
+  .input,
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /* Respects the reduced-motion preference for the tree's pan/zoom transitions. */
 @media (prefers-reduced-motion: reduce) {
   *,

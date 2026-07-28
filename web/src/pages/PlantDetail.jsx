@@ -116,8 +116,11 @@ export default function PlantDetail() {
         {plant.isStabilized && <span className="chip bg-leaf-100 text-leaf-700">Stabilised</span>}
       </div>
 
+      {/* min-w-0: a grid item defaults to min-width:auto, so the wide pod
+          table stretched the whole column past the viewport and the page
+          scrolled sideways. */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+        <div className="min-w-0 space-y-6 lg:col-span-2">
           <Card title="Parentage">
             <div className="grid gap-3 sm:grid-cols-2">
               <ParentSlot label="Seed parent (mother)" parent={parents.mother} />
@@ -268,7 +271,7 @@ export default function PlantDetail() {
           )}
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-6">
           <Card title="Record">
             <dl>
               <DetailRow label="Generation">{plant.generation}</DetailRow>

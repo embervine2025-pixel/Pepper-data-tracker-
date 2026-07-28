@@ -63,7 +63,9 @@ export default function Dashboard() {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Two across even on the narrowest phone: four stacked tiles pushed the
+          actual content most of a screen further down. */}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <StatTile
           label="Plants"
           value={counts.plants}
@@ -205,7 +207,11 @@ function SectionHeading({ title, to }) {
     <div className="mb-2 flex items-baseline justify-between">
       <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-muted">{title}</h2>
       {to && (
-        <Link to={to} className="text-xs font-medium text-chile-600 hover:text-chile-700">
+        // Padding rather than bare text: a 16px-tall link is an awkward tap.
+        <Link
+          to={to}
+          className="-my-2 flex min-h-11 items-center px-2 text-xs font-medium text-chile-600 hover:text-chile-700 sm:my-0 sm:min-h-0 sm:px-0"
+        >
           View all
         </Link>
       )}

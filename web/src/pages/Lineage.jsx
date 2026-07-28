@@ -49,7 +49,7 @@ export default function Lineage() {
         <Spinner label="Building the pedigree" />
       ) : (
         <>
-          <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             <StatTile label="Plants in view" value={data.stats.total} />
             <StatTile
               label="Ancestors"
@@ -93,8 +93,10 @@ export default function Lineage() {
               <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink-muted">
                 Pedigree table
               </h2>
+              {/* nowrap so a narrow screen scrolls the table sideways instead
+                  of wrapping every plant name down three lines. */}
               <div className="card overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full whitespace-nowrap text-sm">
                   <thead>
                     <tr className="border-b border-line text-left text-xs uppercase tracking-wide text-ink-faint">
                       <th className="px-4 py-2.5 font-medium">Generations back</th>

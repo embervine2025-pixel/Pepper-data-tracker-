@@ -194,13 +194,21 @@ export function FamilyTree({ graph, rootId, onSelect, selectedId }) {
         </div>
       </div>
 
+      {/*
+        The diagram scrolls inside its own box rather than being squashed to
+        the screen width. Fitting a five-generation pedigree into 390px
+        rendered the labels at around 6px; a minimum width keeps them legible
+        and lets the reader scroll sideways instead, using the browser's own
+        scrolling rather than a custom gesture.
+      */}
+      <div className="overflow-x-auto overscroll-x-contain">
       <svg
         ref={svgRef}
         role="img"
         aria-label={`Pedigree diagram with ${positioned.length} plants`}
         viewBox={`0 0 ${viewWidth} ${viewHeight}`}
-        className="w-full cursor-grab touch-none select-none active:cursor-grabbing"
-        style={{ maxHeight: '70vh' }}
+        className="w-full cursor-grab select-none active:cursor-grabbing"
+        style={{ maxHeight: '70vh', minWidth: `${Math.min(viewWidth, 560)}px` }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -245,9 +253,11 @@ export function FamilyTree({ graph, rootId, onSelect, selectedId }) {
           </g>
         </g>
       </svg>
+      </div>
 
       <p className="border-t border-line px-4 py-2 text-xs text-ink-faint">
-        Drag to pan · Ctrl/⌘ + scroll to zoom · click a plant to open it
+        Scroll sideways to see more · +/− to zoom · tap a plant to open it
+        <span className="hidden sm:inline"> · drag to pan, Ctrl/⌘ + scroll to zoom</span>
       </p>
     </div>
   );
@@ -307,10 +317,10 @@ function TreeNode({ node, isRoot, isSelected, onSelect }) {
           <text x={14} y={24} fontSize={13} fontWeight={600} fill="var(--color-ink)">
             {truncate(node.name, node.generation ? 18 : 24)}
           </text>
-          <text x={14} y={41} fontSize={11} fill="var(--color-ink-muted)" fontFamily="ui-monospace, monospace">
+          <text x={14} y={41} fontSize={11.5} fill="var(--color-ink-muted)" fontFamily="ui-monospace, monospace">
             {truncate(node.accessionCode, 16)}
           </text>
-          <text x={14} y={56} fontSize={10.5} fill="var(--color-ink-faint)" fontStyle="italic">
+          <text x={14} y={56} fontSize={11} fill="var(--color-ink-faint)" fontStyle="italic">
             {truncate(SPECIES_LABELS[node.species] ?? node.species ?? '', 16)}
           </text>
           {node.generation && (
@@ -326,7 +336,7 @@ function TreeNode({ node, isRoot, isSelected, onSelect }) {
               <text
                 x={BADGE_X + 17}
                 y={25}
-                fontSize={10.5}
+                fontSize={11}
                 fontWeight={600}
                 textAnchor="middle"
                 fill="var(--color-chile-700)"
@@ -337,7 +347,7 @@ function TreeNode({ node, isRoot, isSelected, onSelect }) {
             </>
           )}
           {node.podCount > 0 && (
-            <text x={NODE_W - 14} y={52} fontSize={10} textAnchor="end" fill="var(--color-ink-faint)">
+            <text x={NODE_W - 14} y={52} fontSize={11} textAnchor="end" fill="var(--color-ink-faint)">
               {node.podCount} pod{node.podCount === 1 ? '' : 's'}
             </text>
           )}

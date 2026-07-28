@@ -9,43 +9,51 @@ const NAV = [
   { to: '/sharing', label: 'Sharing' },
 ];
 
+const navLinkClass = ({ isActive }) =>
+  `flex min-h-11 items-center whitespace-nowrap rounded-lg px-3 text-sm font-medium transition-colors ${
+    isActive ? 'bg-chile-50 text-chile-700' : 'text-ink-muted hover:bg-surface-sunken hover:text-ink'
+  }`;
+
+// Taller and edge-to-edge on a phone: 44px is the smallest comfortable tap
+// target, and the row has to hold five labels at 390px.
+const mobileNavLinkClass = ({ isActive }) =>
+  `flex min-h-11 flex-1 items-center justify-center whitespace-nowrap border-b-2 px-1.5 text-[13px] font-medium transition-colors ${
+    isActive ? 'border-chile-600 text-chile-700' : 'border-transparent text-ink-muted'
+  }`;
+
 export function Layout() {
   const { user, signOut } = useAuth();
 
   return (
     <div className="min-h-full bg-surface">
+      {/*
+        Two rows on a phone, one on a laptop. Squeezing the brand, five
+        destinations and the account block onto a single 390px row left only
+        "Dash" visible, so most of the app was unreachable on mobile.
+      */}
       <header className="sticky top-0 z-30 border-b border-line bg-surface-raised/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center gap-6 px-4 py-3 sm:px-6">
-          <Link to="/" className="flex shrink-0 items-center gap-2">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
+          <Link to="/" className="flex min-h-11 shrink-0 items-center gap-2">
             <PepperMark />
             <span className="text-base font-semibold tracking-tight text-ink">
               Pepper Genetics
             </span>
           </Link>
 
-          <nav className="flex flex-1 items-center gap-1 overflow-x-auto" aria-label="Main">
+          <nav className="hidden flex-1 items-center gap-1 overflow-x-auto sm:flex" aria-label="Main">
             {NAV.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `whitespace-nowrap rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? 'bg-chile-50 text-chile-700'
-                      : 'text-ink-muted hover:bg-surface-sunken hover:text-ink'
-                  }`
-                }
-              >
+              <NavLink key={item.to} to={item.to} end={item.end} className={navLinkClass}>
                 {item.label}
               </NavLink>
             ))}
           </nav>
 
-          <div className="flex shrink-0 items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2">
+            {/* Full name on wide screens; on a phone the same link becomes an
+                initial, so account settings stay reachable either way. */}
             <Link
               to="/settings"
-              className="hidden text-right sm:block"
+              className="hidden min-h-11 flex-col justify-center text-right sm:flex"
               title="Account settings"
             >
               <span className="block text-sm font-medium text-ink">{user?.displayName}</span>
@@ -53,11 +61,34 @@ export function Layout() {
                 {user?.programName ?? `@${user?.handle}`}
               </span>
             </Link>
-            <button type="button" onClick={signOut} className="btn-secondary px-3 py-1.5">
+            <Link
+              to="/settings"
+              aria-label="Account settings"
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-sunken text-sm font-semibold text-ink-muted sm:hidden"
+            >
+              {(user?.displayName ?? '?').trim().charAt(0).toUpperCase()}
+            </Link>
+            <button
+              type="button"
+              onClick={signOut}
+              className="btn-secondary min-h-11 px-3 text-sm"
+            >
               Sign out
             </button>
           </div>
         </div>
+
+        {/* Second row, phones only: every destination reachable in one tap. */}
+        <nav
+          className="flex items-stretch justify-between gap-1 overflow-x-auto border-t border-line px-2 sm:hidden"
+          aria-label="Main"
+        >
+          {NAV.map((item) => (
+            <NavLink key={item.to} to={item.to} end={item.end} className={mobileNavLinkClass}>
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
