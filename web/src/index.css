@@ -1,0 +1,106 @@
+@import 'tailwindcss';
+
+/* Tailwind v4 keeps theme tokens in CSS. Everything below is referenced as a
+   normal utility (bg-surface, text-ink-muted, ...). */
+@theme {
+  --color-surface: oklch(99% 0.004 90);
+  --color-surface-raised: oklch(100% 0 0);
+  --color-surface-sunken: oklch(96.5% 0.006 90);
+  --color-line: oklch(90% 0.008 80);
+
+  --color-ink: oklch(24% 0.015 60);
+  --color-ink-muted: oklch(52% 0.014 60);
+  --color-ink-faint: oklch(66% 0.012 60);
+
+  /* Ripe pod red, used for primary actions and the heat scale. */
+  --color-chile-50: oklch(97% 0.018 30);
+  --color-chile-100: oklch(93% 0.04 30);
+  --color-chile-300: oklch(78% 0.12 30);
+  --color-chile-500: oklch(60% 0.19 29);
+  --color-chile-600: oklch(53% 0.20 29);
+  --color-chile-700: oklch(45% 0.17 29);
+
+  /* Leaf green, used for stable/verified states. */
+  --color-leaf-100: oklch(94% 0.04 150);
+  --color-leaf-600: oklch(52% 0.12 150);
+  --color-leaf-700: oklch(44% 0.11 150);
+
+  --color-amber-pod: oklch(72% 0.15 70);
+}
+
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Numeric columns in trait tables line up only with tabular figures. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-chile-500);
+    outline-offset: 2px;
+  }
+}
+
+/* Declared as a utility rather than a component class so the button variants
+   below can @apply it -- Tailwind v4 only lets @apply reference real
+   utilities. */
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm
+         font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-line bg-surface-raised;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-ink-muted mb-1.5;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-line bg-surface-raised px-3 py-2 text-sm text-ink
+           placeholder:text-ink-faint focus:border-chile-500 focus:outline-none
+           focus:ring-2 focus:ring-chile-500/20 disabled:opacity-60;
+  }
+
+  .btn-primary {
+    @apply btn bg-chile-600 text-white hover:bg-chile-700;
+  }
+
+  .btn-secondary {
+    @apply btn border border-line bg-surface-raised text-ink hover:bg-surface-sunken;
+  }
+
+  .btn-ghost {
+    @apply btn text-ink-muted hover:bg-surface-sunken hover:text-ink;
+  }
+
+  .btn-danger {
+    @apply btn border border-chile-300 bg-surface-raised text-chile-700 hover:bg-chile-50;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+}
+
+/* Respects the reduced-motion preference for the tree's pan/zoom transitions. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

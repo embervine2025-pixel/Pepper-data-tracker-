@@ -1,0 +1,23 @@
+{
+  "name": "pepper-data-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Genetic data management for Capsicum breeding programmes",
+  "workspaces": [
+    "server",
+    "web"
+  ],
+  "scripts": {
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "migrate": "npm run migrate --workspace server",
+    "seed": "npm run seed --workspace server",
+    "dev:api": "npm run dev --workspace server",
+    "dev:web": "npm run dev --workspace web",
+    "build": "npm run build --workspace web",
+    "test": "npm test --workspace server"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -119,6 +119,79 @@ test('records parentage and walks it back as a lineage graph', async () => {
   );
 });
 
+test('a partial update leaves unmentioned fields alone', async () => {
+  const { token } = await createBreeder();
+  const plant = await createPlant(token, {
+    generation: 'F2',
+    seedSource: 'Assam landrace collection',
+    sowDate: '2025-02-11',
+    notes: 'Best wall thickness in the block.',
+    plantHeightCm: 124,
+  });
+
+  const patched = await api(`/api/plants/${plant.id}`, {
+    method: 'PATCH',
+    token,
+    body: { name: 'Renamed only' },
+  });
+  assert.equal(patched.status, 200);
+
+  assert.equal(patched.body.plant.name, 'Renamed only');
+  // Everything the PATCH did not mention must survive it.
+  assert.equal(patched.body.plant.generation, 'F2');
+  assert.equal(patched.body.plant.seedSource, 'Assam landrace collection');
+  assert.equal(patched.body.plant.sowDate, '2025-02-11');
+  assert.equal(patched.body.plant.notes, 'Best wall thickness in the block.');
+  assert.equal(patched.body.plant.plantHeightCm, 124);
+});
+
+test('an explicit null clears a field', async () => {
+  const { token } = await createBreeder();
+  const plant = await createPlant(token, { seedSource: 'Original source', generation: 'F2' });
+
+  const patched = await api(`/api/plants/${plant.id}`, {
+    method: 'PATCH',
+    token,
+    body: { seedSource: null },
+  });
+  assert.equal(patched.status, 200);
+  assert.equal(patched.body.plant.seedSource, null);
+  assert.equal(patched.body.plant.generation, 'F2');
+});
+
+test('a pod update does not blank the rest of the phenotype', async () => {
+  const { token } = await createBreeder();
+  const plant = await createPlant(token);
+
+  const created = await api('/api/pods', {
+    method: 'POST',
+    token,
+    body: {
+      plantId: plant.id,
+      podLabel: 'A-1',
+      lengthMm: 64.8,
+      widthMm: 36.2,
+      colourMature: 'deep red',
+      shape: 'conical',
+      pungencyShu: 987000,
+      pungencyMeasure: 'hplc',
+    },
+  });
+  assert.equal(created.status, 201);
+
+  const patched = await api(`/api/pods/${created.body.pod.id}`, {
+    method: 'PATCH',
+    token,
+    body: { weightG: 16.4 },
+  });
+  assert.equal(patched.status, 200);
+  assert.equal(patched.body.pod.weightG, 16.4);
+  assert.equal(patched.body.pod.lengthMm, 64.8);
+  assert.equal(patched.body.pod.colourMature, 'deep red');
+  assert.equal(patched.body.pod.shape, 'conical');
+  assert.equal(patched.body.pod.pungencyShu, 987000);
+});
+
 test('refuses to create a parentage cycle', async () => {
   const { token } = await createBreeder();
   const a = await createPlant(token);

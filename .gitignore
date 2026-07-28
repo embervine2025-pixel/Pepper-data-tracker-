@@ -12,3 +12,7 @@ npm-debug.log*
 .DS_Store
 .vscode/
 .idea/
+
+# npm workspaces keep a single lockfile at the repo root
+server/package-lock.json
+web/package-lock.json
