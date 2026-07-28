@@ -72,11 +72,18 @@ thing is **one service on one port**. The client calls `/api/...` relatively,
 so there is no API URL to configure and no CORS to get wrong.
 
 ```bash
-npm ci
+npm ci --include=dev        # see the note below -- plain `npm ci` is not enough
 npm run build               # emits web/dist
 npm run migrate             # apply the schema to the production database
 npm start                   # serves the app and the API on $PORT
 ```
+
+> **`--include=dev` is required.** Vite and Tailwind are devDependencies —
+> correct, since they are build tools that do not ship in the bundle. But
+> hosting platforms set `NODE_ENV=production`, which makes `npm ci` skip
+> devDependencies entirely, and the build then fails with `sh -c vite build`
+> not found. `--include=dev` installs them for the build; nothing extra is
+> served at runtime.
 
 Required environment:
 
