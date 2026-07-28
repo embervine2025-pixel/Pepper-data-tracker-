@@ -1,15 +1,24 @@
-import { createApp } from './app.js';
-import { config } from './config.js';
-import { pool, closePool } from './db/pool.js';
-
-const app = createApp();
-
+/**
+ * Entry point.
+ *
+ * Modules are imported dynamically so that a configuration problem -- a
+ * missing JWT_SECRET, a frontend build that was never run -- is reported as a
+ * single readable line instead of a module-load stack trace. These are the
+ * errors people read in a deployment log, usually in a hurry.
+ */
 async function start() {
+  const { createApp } = await import('./app.js');
+  const { config } = await import('./config.js');
+  const { pool, closePool } = await import('./db/pool.js');
+
+  const app = createApp();
+
   // Fail loudly at boot rather than on the first request.
   await pool.query('SELECT 1');
 
   const server = app.listen(config.port, () => {
     console.log(`[api] listening on http://localhost:${config.port} (${config.nodeEnv})`);
+    if (config.serveWeb) console.log(`[api] serving the web build from ${config.webDistPath}`);
   });
 
   const shutdown = async (signal) => {
@@ -27,6 +36,6 @@ async function start() {
 }
 
 start().catch((err) => {
-  console.error('[api] failed to start:', err.message);
+  console.error(`[api] failed to start: ${err.message}`);
   process.exit(1);
 });

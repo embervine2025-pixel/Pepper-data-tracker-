@@ -65,6 +65,56 @@ cover authentication, the parentage rules, phenotype validation, and — in
 
 ---
 
+## Deploying
+
+In production the API process also serves the built React app, so the whole
+thing is **one service on one port**. The client calls `/api/...` relatively,
+so there is no API URL to configure and no CORS to get wrong.
+
+```bash
+npm ci
+npm run build               # emits web/dist
+npm run migrate             # apply the schema to the production database
+npm start                   # serves the app and the API on $PORT
+```
+
+Required environment:
+
+| Variable | Notes |
+| -------- | ----- |
+| `NODE_ENV` | `production` |
+| `PORT` | Most platforms set this for you |
+| `DATABASE_URL` | Append `?sslmode=require` for managed Postgres, or `?sslmode=no-verify` if the provider uses a self-signed certificate |
+| `JWT_SECRET` | **Required** — startup refuses without it. Generate with `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` |
+
+Changing `JWT_SECRET` signs every existing session out, which is how you
+revoke all tokens at once if you ever need to.
+
+`GET /api/health` is a dependency-free liveness check for the platform.
+Startup failures print one line, not a stack trace:
+
+```
+[api] failed to start: Missing required environment variable: JWT_SECRET
+```
+
+**Running the frontend separately** (a CDN or static host, with the API on its
+own box) is also supported: set `SERVE_WEB=false` on the API and point
+`CORS_ORIGIN` at the frontend's origin. You then need the static host to proxy
+`/api` to the API, or the browser's relative calls will 404. The single-service
+layout above avoids that entirely, and is what I would use unless there is a
+reason not to.
+
+Two things to get right whatever you choose:
+
+- **Run migrations as part of deploying**, before the new process takes
+  traffic. `npm run migrate` is safe to re-run; it applies only what is
+  pending.
+- **Do not run `npm run seed` against production.** It creates example
+  accounts with a published password. It refuses to run when `NODE_ENV` is
+  `production`, but keep it out of your deploy scripts regardless.
+
+---
+
 ## The data model
 
 ```

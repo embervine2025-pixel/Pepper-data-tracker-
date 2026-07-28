@@ -1,4 +1,8 @@
 import 'dotenv/config';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const here = dirname(fileURLToPath(import.meta.url));
 
 function required(name, fallback) {
   const value = process.env[name] ?? fallback;
@@ -31,4 +35,15 @@ export const config = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   bcryptRounds: Number(process.env.BCRYPT_ROUNDS ?? (nodeEnv === 'test' ? 4 : 12)),
   corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+
+  /**
+   * In production the API also serves the built React app, so the whole thing
+   * is one origin on one port: no CORS, and the client's relative /api calls
+   * resolve without configuration. In development Vite serves the frontend
+   * and proxies /api here instead, so this stays off.
+   *
+   * Set SERVE_WEB=false to run the API alone behind a separate static host.
+   */
+  serveWeb: (process.env.SERVE_WEB ?? String(nodeEnv === 'production')) === 'true',
+  webDistPath: resolve(process.env.WEB_DIST_PATH ?? join(here, '..', '..', 'web', 'dist')),
 };

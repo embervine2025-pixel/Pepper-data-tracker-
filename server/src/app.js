@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -63,6 +65,28 @@ export function createApp() {
   app.use('/api/shares', sharesRouter);
   app.use('/api/members', membersRouter);
   app.use('/api/dashboard', dashboardRouter);
+
+  // Serve the built React app from the same origin as the API. Mounted after
+  // the routers so /api always wins, and before notFoundHandler so an unknown
+  // /api path still gets a JSON 404 rather than the HTML shell.
+  if (config.serveWeb) {
+    if (!existsSync(join(config.webDistPath, 'index.html'))) {
+      throw new Error(
+        `SERVE_WEB is on but no build was found at ${config.webDistPath}. ` +
+          'Run `npm run build` first, or set SERVE_WEB=false to run the API alone.',
+      );
+    }
+
+    app.use(express.static(config.webDistPath, { index: false, maxAge: '1h' }));
+
+    // Client-side routing: a deep link like /plants/<id> is not a file on
+    // disk, so hand any other GET back to the app shell and let React Router
+    // resolve it.
+    app.use((req, res, next) => {
+      if (req.method !== 'GET' || req.path.startsWith('/api')) return next();
+      res.sendFile(join(config.webDistPath, 'index.html'));
+    });
+  }
 
   app.use(notFoundHandler);
   app.use(errorHandler);
